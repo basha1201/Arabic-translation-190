@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مترجم اللهجات العربية</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for dialect buttons container */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #4a5568; /* Gray-700 from Tailwind */
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #10b981; /* Emerald-500 from Tailwind */
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #059669; /* Emerald-600 from Tailwind */
+        }
+
+        /* Set Inter font for the whole body, falls back to generic sans-serif */
+        body {
+            font-family: "Inter", sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Basic styles for comments to ensure readability */
+        .comment-container {
+            background-color: #374151; /* Gray-700 */
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .comment-author {
+            font-weight: bold;
+            color: #10b981; /* Emerald-500 */
+            margin-bottom: 0.5rem;
+        }
+        .comment-text {
+            color: #e5e7eb; /* Gray-200 */
+            word-wrap: break-word; /* Ensure long words wrap */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col items-center justify-center p-4">
+
+    <div class="bg-gray-700 p-8 rounded-xl shadow-2xl w-full max-w-4xl border border-gray-600 mb-8 relative">
+        <!-- Navigation Bar with Menu Button -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500" id="appTitle">
+                مترجم اللهجات العربية
+            </h1>
+            <!-- Menu Button -->
+            <div class="relative">
+                <button id="menuButton" class="p-3 bg-gray-600 rounded-full shadow-lg hover:bg-gray-500 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <!-- Main Dropdown Menu -->
+                <div id="menuDropdown" class="absolute left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl z-10 hidden border border-gray-600">
+                    <a href="#" id="homeMenuItem" class="block px-4 py-3 text-lg text-gray-200 hover:bg-gray-700 rounded-t-lg transition-colors duration-200">
+                        <span id="menuHome">الصفحة الرئيسية</span> 🏠
+                    </a>
+                    <a href="#" id="helpMenuItem" class="block px-4 py-3 text-lg text-gray-200 hover:bg-gray-700 transition-colors duration-200">
+                        <span id="menuHelp">المساعدة</span> 🫂
+                    </a>
+                    <a href="#" id="languageMenuItem" class="block px-4 py-3 text-lg text-gray-200 hover:bg-gray-700 transition-colors duration-200">
+                        <span id="menuLanguage">لغة الموقع</span> 🐒
+                    </a>
+                    <a href="#" id="reviewsMenuItem" class="block px-4 py-3 text-lg text-gray-200 hover:bg-gray-700 rounded-b-lg transition-colors duration-200">
+                        <span id="menuReviews">آراء المستخدمين</span> 👥
+                    </a>
+                </div>
+
+                <!-- Language Sub-Dropdown -->
+                <div id="languageDropdown" class="absolute left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl z-20 hidden border border-gray-600">
+                    <!-- Language options will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message Display -->
+        <div id="errorMessage" class="hidden bg-red-600 bg-opacity-70 text-white p-4 rounded-lg mb-6 text-center text-lg font-medium">
+            <!-- Error messages will be injected here by JavaScript -->
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Source Input Section -->
+            <div>
+                <label for="sourceInput" class="block text-xl font-semibold mb-3 text-emerald-300">
+                    <span id="sourceInputLabel"></span>:
+                </label>
+                <textarea
+                    id="sourceInput"
+                    class="w-full p-4 rounded-lg bg-gray-800 border border-gray-600 text-white text-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all duration-300 resize-y min-h-[150px]"
+                    placeholder=""
+                ></textarea>
+            </div>
+
+            <!-- Right Column: Dialect Selections and Output -->
+            <div>
+                <!-- Source Dialect Selection -->
+                <div>
+                    <label for="sourceDialectSearch" class="block text-xl font-semibold mb-3 text-teal-300">
+                        <span id="sourceDialectSelectionLabel">اختر اللهجة المصدر</span>:
+                    </label>
+                    <input
+                        id="sourceDialectSearch"
+                        type="text"
+                        class="w-full p-3 mb-4 rounded-lg bg-gray-800 border border-gray-600 text-white text-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all duration-300"
+                        placeholder="ابحث عن اللهجة المصدر..."
+                    />
+                    <div id="sourceDialectButtonsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[120px] overflow-y-auto custom-scrollbar pr-2 mb-6">
+                        <!-- Source Dialect buttons will be generated here by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Target Dialect Selection -->
+                <div>
+                    <label for="targetDialectSearch" class="block text-xl font-semibold mb-3 text-emerald-300">
+                        <span id="targetDialectSelectionLabel">اختر اللهجة المستهدفة</span>:
+                    </label>
+                    <input
+                        id="targetDialectSearch"
+                        type="text"
+                        class="w-full p-3 mb-4 rounded-lg bg-gray-800 border border-gray-600 text-white text-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all duration-300"
+                        placeholder="ابحث عن اللهجة المستهدفة..."
+                    />
+                    <div id="targetDialectButtonsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[120px] overflow-y-auto custom-scrollbar pr-2 mb-6">
+                        <!-- Target Dialect buttons will be generated here by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Translated Output Section -->
+                <div>
+                    <label for="translatedOutput" class="block text-xl font-semibold mb-3 text-fuchsia-300">
+                        <span id="translatedOutputLabel"></span>:
+                    </label>
+                    <div
+                        id="translatedOutput"
+                        class="w-full p-4 rounded-lg bg-gray-800 border border-gray-600 text-white text-lg min-h-[150px] flex items-center justify-center break-words whitespace-pre-wrap"
+                    >
+                        الترجمة ستظهر هنا...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Use Section (Help) -->
+        <div id="howToUseSection" class="bg-gray-800 p-6 rounded-lg shadow-inner border border-gray-600 mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-emerald-400" id="howToUseTitle">كيف تستخدم المترجم؟</h2>
+            <ul class="list-disc list-inside text-gray-300 space-y-2 text-lg">
+                <li id="howToUseStep1">اكتب النص الذي تريد ترجمته في خانة "النص (المُدخل)".</li>
+                <li id="howToUseStep2">اختر "اللهجة المصدر" التي كُتب بها النص الأصلي. يمكنك البحث عن اللهجة في حقل البحث.</li>
+                <li id="howToUseStep3">اختر "اللهجة المستهدفة" التي تريد الترجمة إليها.</li>
+                <li id="howToUseStep4">اضغط على زر "ترجمة النص" للحصول على الترجمة.</li>
+                <li id="howToUseStep5">إذا أردت تبديل اتجاه الترجمة (مثلاً، من لهجة معينة إلى لهجة أخرى أو إلى الفصحى)، اضغط على زر "عكس اتجاه الترجمة".</li>
+                <li id="howToUseStep6">يدعم المترجم الترجمة بين جميع اللهجات المتاحة بما في ذلك "اللغة العربية الفصحى" كخيار مصدر أو مستهدف.</li>
+            </ul>
+        </div>
+
+        <!-- User Reviews Section -->
+        <div id="reviewsSection" class="bg-gray-800 p-6 rounded-lg shadow-inner border border-gray-600 mb-8 hidden">
+            <h2 class="text-2xl font-bold mb-4 text-emerald-400" id="reviewsTitle">آراء المستخدمين</h2>
+            <div id="commentsList" class="mb-6 space-y-4">
+                <!-- Default and new comments will be rendered here -->
+            </div>
+
+            <h3 class="text-xl font-bold mb-3 text-teal-300" id="addCommentTitle">أضف تعليقك</h3>
+            <div class="mb-4">
+                <label for="commentName" class="block text-lg font-medium text-gray-300 mb-2" id="commentNameLabel">اسمك (اختياري)</label>
+                <input type="text" id="commentName" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-teal-500 outline-none" placeholder="اكتب اسمك هنا...">
+            </div>
+            <div class="mb-4">
+                <label for="commentText" class="block text-lg font-medium text-gray-300 mb-2" id="commentTextLabel">تعليقك</label>
+                <textarea id="commentText" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-teal-500 outline-none resize-y min-h-[80px]" placeholder="اكتب تعليقك هنا..."></textarea>
+            </div>
+            <button id="submitCommentButton" class="w-full py-3 px-6 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-lg rounded-xl shadow-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="submitCommentBtnText">إرسال التعليق</span>
+            </button>
+        </div>
+
+        <!-- Swap Direction Button -->
+        <button
+            id="swapDirectionButton"
+            class="w-full md:w-auto py-3 px-6 bg-gray-600 text-white font-bold text-lg rounded-xl shadow-md hover:bg-gray-500 transition-all duration-300 transform hover:scale-105 mb-6 mx-auto block"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            <span id="swapDirectionBtnText">عكس اتجاه الترجمة</span>
+        </button>
+
+        <!-- Translate Button -->
+        <button
+            id="translateButton"
+            class="w-full py-4 px-6 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-2xl rounded-xl shadow-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7.828a4 4 0 00-5.656 0L8 9.343l1.414 1.414L10.828 10.828a2 2 0 112.828 0l1.414 1.414L16 12.657l-1.414-1.414a4 4 0 000-5.656z" />
+            </svg>
+            <span id="translateBtnText">ترجمة النص</span>
+        </button>
+    </div>
+
+    <!-- Copyright Information -->
+    <p class="text-sm text-gray-400 text-center mt-8 italic" id="copyrightText">جميع حقوق الطبع و النشر لحسن الأسطورة 2025©</p>
+
+    <script>
+        // DOM elements
+        const sourceInput = document.getElementById('sourceInput');
+        const sourceDialectSearch = document.getElementById('sourceDialectSearch');
+        const sourceDialectButtonsContainer = document.getElementById('sourceDialectButtonsContainer');
+        const targetDialectSearch = document.getElementById('targetDialectSearch');
+        const targetDialectButtonsContainer = document.getElementById('targetDialectButtonsContainer');
+        const translatedOutput = document.getElementById('translatedOutput');
+        const translateButton = document.getElementById('translateButton');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const swapDirectionButton = document.getElementById('swapDirectionButton');
+
+        const sourceInputLabel = document.getElementById('sourceInputLabel');
+        const translatedOutputLabel = document.getElementById('translatedOutputLabel');
+        const sourceDialectSelectionLabel = document.getElementById('sourceDialectSelectionLabel');
+        const targetDialectSelectionLabel = document.getElementById('targetDialectSelectionLabel');
+
+        // New DOM elements for dropdown menu and sections
+        const appTitle = document.getElementById('appTitle');
+        const menuButton = document.getElementById('menuButton');
+        const menuDropdown = document.getElementById('menuDropdown');
+        const homeMenuItem = document.getElementById('homeMenuItem');
+        const helpMenuItem = document.getElementById('helpMenuItem');
+        const languageMenuItem = document.getElementById('languageMenuItem');
+        const reviewsMenuItem = document.getElementById('reviewsMenuItem');
+        const languageDropdown = document.getElementById('languageDropdown');
+        const howToUseSection = document.getElementById('howToUseSection');
+        const reviewsSection = document.getElementById('reviewsSection');
+
+        // Text elements for translation
+        const menuHome = document.getElementById('menuHome');
+        const menuHelp = document.getElementById('menuHelp');
+        const menuLanguage = document.getElementById('menuLanguage');
+        const menuReviews = document.getElementById('menuReviews');
+        const howToUseTitle = document.getElementById('howToUseTitle');
+        const howToUseStep1 = document.getElementById('howToUseStep1');
+        const howToUseStep2 = document.getElementById('howToUseStep2');
+        const howToUseStep3 = document.getElementById('howToUseStep3');
+        const howToUseStep4 = document.getElementById('howToUseStep4');
+        const howToUseStep5 = document.getElementById('howToUseStep5');
+        const howToUseStep6 = document.getElementById('howToUseStep6');
+        const swapDirectionBtnText = document.getElementById('swapDirectionBtnText');
+        const translateBtnText = document.getElementById('translateBtnText');
+        const copyrightText = document.getElementById('copyrightText');
+
+        // Reviews section elements
+        const reviewsTitle = document.getElementById('reviewsTitle');
+        const commentsList = document.getElementById('commentsList');
+        const addCommentTitle = document.getElementById('addCommentTitle');
+        const commentNameLabel = document.getElementById('commentNameLabel');
+        const commentName = document.getElementById('commentName');
+        const commentTextLabel = document.getElementById('commentTextLabel');
+        const commentText = document.getElementById('commentText');
+        const submitCommentButton = document.getElementById('submitCommentButton');
+        const submitCommentBtnText = document.getElementById('submitCommentBtnText');
+
+
+        // State variables
+        let sourceText = '';
+        let sourceDialectId = 'fusha'; // Default source to Fusha
+        let targetDialectId = 'dz'; // Default target to Algerian dialect
+        let isLoading = false;
+        let sourceSearchTerm = '';
+        let targetSearchTerm = '';
+        let currentError = null;
+        let currentLanguage = 'ar'; // Default language to Arabic
+
+        // Define translations for all UI elements
+        const translations = {
+            'ar': {
+                appTitle: 'مترجم اللهجات العربية',
+                menuHome: 'الصفحة الرئيسية',
+                menuHelp: 'المساعدة',
+                menuLanguage: 'لغة الموقع',
+                menuReviews: 'آراء المستخدمين',
+                sourceInputLabel: 'النص (المُدخل)',
+                sourceInputPlaceholder: 'اكتب النص هنا ({dialectName}) للترجمة...',
+                sourceDialectSelectionLabel: 'اختر اللهجة المصدر',
+                sourceDialectSearchPlaceholder: 'ابحث عن اللهجة المصدر...',
+                targetDialectSelectionLabel: 'اختر اللهجة المستهدفة',
+                targetDialectSearchPlaceholder: 'ابحث عن اللهجة المستهدفة...',
+                translatedOutputLabel: 'النص المترجم',
+                translatedOutputDefault: 'الترجمة ستظهر هنا...',
+                loadingTranslation: 'جاري الترجمة...',
+                howToUseTitle: 'كيف تستخدم المترجم؟',
+                howToUseStep1: 'اكتب النص الذي تريد ترجمته في خانة "النص (المُدخل)".',
+                howToUseStep2: 'اختر "اللهجة المصدر" التي كُتب بها النص الأصلي. يمكنك البحث عن اللهجة في حقل البحث.',
+                howToUseStep3: 'اختر "اللهجة المستهدفة" التي تريد الترجمة إليها.',
+                howToUseStep4: 'اضغط على زر "ترجمة النص" للحصول على الترجمة.',
+                howToUseStep5: 'إذا أردت تبديل اتجاه الترجمة (مثلاً، من لهجة معينة إلى لهجة أخرى أو إلى الفصحى)، اضغط على زر "عكس اتجاه الترجمة".',
+                howToUseStep6: 'يدعم المترجم الترجمة بين جميع اللهجات المتاحة بما في ذلك "اللغة العربية الفصحى" كخيار مصدر أو مستهدف.',
+                swapDirectionBtnText: 'عكس اتجاه الترجمة',
+                translateBtnText: 'ترجمة النص',
+                copyrightText: 'جميع حقوق الطبع و النشر لحسن الأسطورة 2025©',
+                errorMessageNoText: 'يرجى كتابة النص للترجمة.',
+                errorMessageNoDialect: 'يرجى اختيار اللهجة المصدر واللهجة المستهدفة.',
+                errorMessageSameDialect: 'يجب أن تكون اللهجة المصدر واللهجة المستهدفة مختلفتين.',
+                errorMessageDialectNotFound: 'حدث خطأ: اللهجة المصدر أو المستهدفة غير موجودة.',
+                errorMessageApiError: 'خطأ في استجابة الخادم: {status} - {message}',
+                errorMessageFetchError: 'حدث خطأ أثناء الترجمة: {message}. يرجى المحاولة مرة أخرى.',
+                noTranslationFound: 'لم يتم العثور على ترجمة. حاول مرة أخرى.',
+                reviewsTitle: 'آراء المستخدمين',
+                addCommentTitle: 'أضف تعليقك',
+                commentNameLabel: 'اسمك (اختياري)',
+                commentNamePlaceholder: 'اكتب اسمك هنا...',
+                commentTextLabel: 'تعليقك',
+                commentTextPlaceholder: 'اكتب تعليقك هنا...',
+                submitCommentBtnText: 'إرسال التعليق',
+                anonymousUser: 'مجهول',
+                translationError: 'حدث خطأ.',
+                homeWelcome: 'مرحباً بك في الصفحة الرئيسية!',
+            },
+            'en': {
+                appTitle: 'Arabic Dialect Translator',
+                menuHome: 'Home Page',
+                menuHelp: 'Help',
+                menuLanguage: 'Site Language',
+                menuReviews: 'User Reviews',
+                sourceInputLabel: 'Text (Input)',
+                sourceInputPlaceholder: 'Type text here ({dialectName}) to translate...',
+                sourceDialectSelectionLabel: 'Select Source Dialect',
+                sourceDialectSearchPlaceholder: 'Search source dialect...',
+                targetDialectSelectionLabel: 'Select Target Dialect',
+                targetDialectSearchPlaceholder: 'Search target dialect...',
+                translatedOutputLabel: 'Translated Text',
+                translatedOutputDefault: 'Translation will appear here...',
+                loadingTranslation: 'Translating...',
+                howToUseTitle: 'How to Use the Translator?',
+                howToUseStep1: 'Type the text you want to translate in the "Text (Input)" field.',
+                howToUseStep2: 'Select the "Source Dialect" in which the original text was written. You can search for the dialect in the search field.',
+                howToUseStep3: 'Select the "Target Dialect" you want to translate to.',
+                howToUseStep4: 'Click the "Translate Text" button to get the translation.',
+                howToUseStep5: 'If you want to swap the translation direction (e.g., from a specific dialect to another or to Modern Standard Arabic), click the "Reverse Translation Direction" button.',
+                howToUseStep6: 'The translator supports translation between all available dialects, including "Modern Standard Arabic" as a source or target option.',
+                swapDirectionBtnText: 'Reverse Translation Direction',
+                translateBtnText: 'Translate Text',
+                copyrightText: 'All rights reserved to Hassan Al-Ostoura 2025©',
+                errorMessageNoText: 'Please enter text to translate.',
+                errorMessageNoDialect: 'Please select both source and target dialects.',
+                errorMessageSameDialect: 'Source and target dialects must be different.',
+                errorMessageDialectNotFound: 'Error: Source or target dialect not found.',
+                errorMessageApiError: 'Server response error: {status} - {message}',
+                errorMessageFetchError: 'An error occurred during translation: {message}. Please try again.',
+                noTranslationFound: 'No translation found. Please try again.',
+                reviewsTitle: 'User Reviews',
+                addCommentTitle: 'Add your comment',
+                commentNameLabel: 'Your Name (optional)',
+                commentNamePlaceholder: 'Enter your name here...',
+                commentTextLabel: 'Your Comment',
+                commentTextPlaceholder: 'Write your comment here...',
+                submitCommentBtnText: 'Submit Comment',
+                anonymousUser: 'Anonymous',
+                translationError: 'An error occurred.',
+                homeWelcome: 'Welcome to the Home Page!',
+            },
+            'es': {
+                appTitle: 'Traductor de Dialectos Árabes',
+                menuHome: 'Página de inicio',
+                menuHelp: 'Ayuda',
+                menuLanguage: 'Idioma del sitio',
+                menuReviews: 'Opiniones de usuarios',
+                sourceInputLabel: 'Texto (Entrada)',
+                sourceInputPlaceholder: 'Escribe el texto aquí ({dialectName}) para traducir...',
+                sourceDialectSelectionLabel: 'Seleccionar Dialecto Origen',
+                sourceDialectSearchPlaceholder: 'Buscar dialecto de origen...',
+                targetDialectSelectionLabel: 'Seleccionar Dialecto Destino',
+                targetDialectSearchPlaceholder: 'Buscar dialecto de destino...',
+                translatedOutputLabel: 'Texto Traducido',
+                translatedOutputDefault: 'La traducción aparecerá aquí...',
+                loadingTranslation: 'Traduciendo...',
+                howToUseTitle: '¿Cómo usar el Traductor?',
+                howToUseStep1: 'Escriba el texto que desea traducir en el campo "Texto (Entrada)".',
+                howToUseStep2: 'Seleccione el "Dialecto de Origen" en el que se escribió el texto original. Puede buscar el dialecto en el campo de búsqueda.',
+                howToUseStep3: 'Seleccione el "Dialecto de Destino" al que desea traducir.',
+                howToUseStep4: 'Haga clic en el botón "Traducir Texto" para obtener la traducción.',
+                howToUseStep5: 'Si desea invertir la dirección de la traducción (por ejemplo, de un dialecto específico a otro o al árabe estándar moderno), haga clic en el botón "Invertir dirección de traducción".',
+                howToUseStep6: 'El traductor admite la traducción entre todos los dialectos disponibles, incluido el "Árabe Estándar Moderno" como opción de origen o destino.',
+                swapDirectionBtnText: 'Invertir dirección de traducción',
+                translateBtnText: 'Traducir Texto',
+                copyrightText: 'Todos los derechos reservados a Hassan Al-Ostoura 2025©',
+                errorMessageNoText: 'Por favor, introduce el texto a traducir.',
+                errorMessageNoDialect: 'Por favor, selecciona los dialectos de origen y destino.',
+                errorMessageSameDialect: 'Los dialectos de origen y destino deben ser diferentes.',
+                errorMessageDialectNotFound: 'Error: Dialecto de origen o destino no encontrado.',
+                errorMessageApiError: 'Error de respuesta del servidor: {status} - {message}',
+                errorMessageFetchError: 'Ocurrió un error durante la traducción: {message}. Por favor, inténtalo de nuevo.',
+                noTranslationFound: 'No se encontró traducción. Por favor, inténtalo de nuevo.',
+                reviewsTitle: 'Opiniones de Usuarios',
+                addCommentTitle: 'Añade tu comentario',
+                commentNameLabel: 'Tu nombre (opcional)',
+                commentNamePlaceholder: 'Introduce tu nombre aquí...',
+                commentTextLabel: 'Tu comentario',
+                commentTextPlaceholder: 'Escribe tu comentario aquí...',
+                submitCommentBtnText: 'Enviar comentario',
+                anonymousUser: 'Anónimo',
+                translationError: 'Ocurrió un error.',
+                homeWelcome: '¡Bienvenido a la página de inicio!',
+            },
+            'it': {
+                appTitle: 'Traduttore di Dialetti Arabi',
+                menuHome: 'Pagina iniziale',
+                menuHelp: 'Aiuto',
+                menuLanguage: 'Lingua del sito',
+                menuReviews: 'Recensioni degli utenti',
+                sourceInputLabel: 'Testo (Input)',
+                sourceInputPlaceholder: 'Digita il testo qui ({dialectName}) per tradurre...',
+                sourceDialectSelectionLabel: 'Seleziona Dialetto di Origine',
+                sourceDialectSearchPlaceholder: 'Cerca dialetto di origine...',
+                targetDialectSelectionLabel: 'Seleziona Dialetto di Destinazione',
+                targetDialectSearchPlaceholder: 'Cerca dialetto di destinazione...',
+                translatedOutputLabel: 'Testo Tradotto',
+                translatedOutputDefault: 'La traduzione apparirà qui...',
+                loadingTranslation: 'Traducendo...',
+                howToUseTitle: 'Come usare il Traduttore?',
+                howToUseStep1: 'Digita il testo che desideri tradurre nel campo "Testo (Input)".',
+                howToUseStep2: 'Seleziona il "Dialetto di Origine" in cui è stato scritto il testo originale. Puoi cercare il dialetto nel campo di ricerca.',
+                howToUseStep3: 'Seleziona il "Dialetto di Destinazione" in cui desideri tradurre.',
+                howToUseStep4: 'Fai clic sul pulsante "Traduci Testo" per ottenere la traduzione.',
+                howToUseStep5: 'Se desideri invertire la direzione della traduzione (ad esempio, da un dialetto specifico a un altro o all\'arabo standard moderno), fai clic sul pulsante "Inverti direzione di traduzione".',
+                howToUseStep6: 'Il traduttore supporta la traduzione tra tutti i dialetti disponibili, incluso l\'"Arabo Standard Moderno" come opzione di origine o destinazione.',
+                swapDirectionBtnText: 'Inverti direzione di traduzione',
+                translateBtnText: 'Traduci Testo',
+                copyrightText: 'Tutti i diritti riservati a Hassan Al-Ostoura 2025©',
+                errorMessageNoText: 'Si prega di inserire il testo da tradurre.',
+                errorMessageNoDialect: 'Si prega di selezionare sia il dialetto di origine che quello di destinazione.',
+                errorMessageSameDialect: 'I dialetti di origine e destinazione devono essere diversi.',
+                errorMessageDialectNotFound: 'Errore: Dialetto di origine o destinazione non trovato.',
+                errorMessageApiError: 'Errore di risposta del server: {status} - {message}',
+                errorMessageFetchError: 'Si è verificato un errore durante la traduzione: {message}. Si prega di riprovare.',
+                noTranslationFound: 'Nessuna traduzione trovata. Riprova.',
+                reviewsTitle: 'Recensioni degli Utenti',
+                addCommentTitle: 'Aggiungi il tuo commento',
+                commentNameLabel: 'Il tuo nome (opzionale)',
+                commentNamePlaceholder: 'Inserisci il tuo nome qui...',
+                commentTextLabel: 'Il tuo commento',
+                commentTextPlaceholder: 'Scrivi il tuo commento qui...',
+                submitCommentBtnText: 'Invia commento',
+                anonymousUser: 'Anonimo',
+                translationError: 'Si è verificato un errore.',
+                homeWelcome: 'Benvenuto nella pagina iniziale!',
+            },
+            'ru': {
+                appTitle: 'Переводчик Арабских Диалектов',
+                menuHome: 'Домашняя страница',
+                menuHelp: 'Помощь',
+                menuLanguage: 'Язык сайта',
+                menuReviews: 'Отзывы пользователей',
+                sourceInputLabel: 'Текст (Ввод)',
+                sourceInputPlaceholder: 'Введите текст здесь ({dialectName}) для перевода...',
+                sourceDialectSelectionLabel: 'Выберите исходный диалект',
+                sourceDialectSearchPlaceholder: 'Поиск исходного диалекта...',
+                targetDialectSelectionLabel: 'Выберите целевой диалект',
+                targetDialectSearchPlaceholder: 'Поиск целевого диалекта...',
+                translatedOutputLabel: 'Переведенный текст',
+                translatedOutputDefault: 'Перевод появится здесь...',
+                loadingTranslation: 'Перевод...',
+                howToUseTitle: 'Как пользоваться Переводчиком?',
+                howToUseStep1: 'Введите текст, который хотите перевести, в поле "Текст (Ввод)".',
+                howToUseStep2: 'Выберите "Исходный диалект", на котором был написан исходный текст. Вы можете найти диалект в поле поиска.',
+                howToUseStep3: 'Выберите "Целевой диалект", на который вы хотите перевести.',
+                howToUseStep4: 'Нажмите кнопку "Перевести текст", чтобы получить перевод.',
+                howToUseStep5: 'Если вы хотите поменять направление перевода (например, с определенного диалекта на другой или на современный стандартный арабский), нажмите кнопку "Изменить направление перевода".',
+                howToUseStep6: 'Переводчик поддерживает перевод между всеми доступными диалектами, включая "Современный стандартный арабский" в качестве исходного или целевого варианта.',
+                swapDirectionBtnText: 'Изменить направление перевода',
+                translateBtnText: 'Перевести текст',
+                copyrightText: 'Все права защищены Hassan Al-Ostoura 2025©',
+                errorMessageNoText: 'Пожалуйста, введите текст для перевода.',
+                errorMessageNoDialect: 'Пожалуйста, выберите исходный и целевой диалекты.',
+                errorMessageSameDialect: 'Исходный и целевой диалекты должны быть разными.',
+                errorMessageDialectNotFound: 'Ошибка: Исходный или целевой диалект не найден.',
+                errorMessageApiError: 'Ошибка ответа сервера: {status} - {message}',
+                errorMessageFetchError: 'Произошла ошибка во время перевода: {message}. Пожалуйста, попробуйте еще раз.',
+                noTranslationFound: 'Перевод не найден. Пожалуйста, попробуйте еще раз.',
+                reviewsTitle: 'Отзывы пользователей',
+                addCommentTitle: 'Добавьте ваш комментарий',
+                commentNameLabel: 'Ваше имя (необязательно)',
+                commentNamePlaceholder: 'Введите ваше имя здесь...',
+                commentTextLabel: 'Ваш комментарий',
+                commentTextPlaceholder: 'Напишите ваш комментарий здесь...',
+                submitCommentBtnText: 'Отправить комментарий',
+                anonymousUser: 'Анонимный',
+                translationError: 'Произошла ошибка.',
+                homeWelcome: 'Добро пожаловать на домашнюю страницу!',
+            },
+            'fr': {
+                appTitle: 'Traducteur de Dialectes Arabes',
+                menuHome: 'Page d\'accueil',
+                menuHelp: 'Aide',
+                menuLanguage: 'Langue du site',
+                menuReviews: 'Avis des utilisateurs',
+                sourceInputLabel: 'Texte (Saisie)',
+                sourceInputPlaceholder: 'Tapez le texte ici ({dialectName}) pour traduire...',
+                sourceDialectSelectionLabel: 'Sélectionner le Dialecte Source',
+                sourceDialectSearchPlaceholder: 'Rechercher le dialecte source...',
+                targetDialectSelectionLabel: 'Sélectionner le Dialecte Cible',
+                targetDialectSearchPlaceholder: 'Rechercher le dialecte cible...',
+                translatedOutputLabel: 'Texte Traduit',
+                translatedOutputDefault: 'La traduction apparaîtra ici...',
+                loadingTranslation: 'Traduction en cours...',
+                howToUseTitle: 'Comment utiliser le Traducteur ?',
+                howToUseStep1: 'Tapez le texte que vous souhaitez traduire dans le champ "Texte (Saisie)".',
+                howToUseStep2: 'Sélectionnez le "Dialecte Source" dans lequel le texte original a été écrit. Vous pouvez rechercher le dialecte dans le champ de recherche.',
+                howToUseStep3: 'Sélectionnez le "Dialecte Cible" vers lequel vous souhaitez traduire.',
+                howToUseStep4: 'Cliquez sur le bouton "Traduire le Texte" pour obtenir la traduction.',
+                howToUseStep5: 'Si vous souhaitez inverser la direction de la traduction (par exemple, d\'un dialecte spécifique à un autre ou à l\'arabe standard moderne), cliquez sur le bouton "Inverser la direction de traduction".',
+                howToUseStep6: 'Le traducteur prend en charge la traduction entre tous les dialectes disponibles, y compris l\'"Arabe Standard Moderne" comme option source ou cible.',
+                swapDirectionBtnText: 'Inverser la direction de traduction',
+                translateBtnText: 'Traduire le Texte',
+                copyrightText: 'Tous droits réservés à Hassan Al-Ostoura 2025©',
+                errorMessageNoText: 'Veuillez saisir le texte à traduire.',
+                errorMessageNoDialect: 'Veuillez sélectionner les dialectes source et cible.',
+                errorMessageSameDialect: 'Les dialectes source et cible doivent être différents.',
+                errorMessageDialectNotFound: 'Erreur : Dialecte source ou cible introuvable.',
+                errorMessageApiError: 'Erreur de réponse du serveur : {status} - {message}',
+                errorMessageFetchError: 'Une erreur est survenue lors de la traduction : {message}. Veuillez réessayer.',
+                noTranslationFound: 'Aucune traduction trouvée. Veuillez réessayer.',
+                reviewsTitle: 'Avis des utilisateurs',
+                addCommentTitle: 'Ajoutez votre commentaire',
+                commentNameLabel: 'Votre nom (facultatif)',
+                commentNamePlaceholder: 'Entrez votre nom ici...',
+                commentTextLabel: 'Votre commentaire',
+                commentTextPlaceholder: 'Écrivez votre commentaire ici...',
+                submitCommentBtnText: 'Soumettre le commentaire',
+                anonymousUser: 'Anonyme',
+                translationError: 'Une erreur est survenue.',
+                homeWelcome: 'Bienvenue sur la page d\'accueil !',
+            },
+            'de': {
+                appTitle: 'Arabischer Dialektübersetzer',
+                menuHome: 'Startseite',
+                menuHelp: 'Hilfe',
+                menuLanguage: 'Sprache der Webseite',
+                menuReviews: 'Benutzerbewertungen',
+                sourceInputLabel: 'Text (Eingabe)',
+                sourceInputPlaceholder: 'Geben Sie hier Text ein ({dialectName}) zum Übersetzen...',
+                sourceDialectSelectionLabel: 'Quellendialekt auswählen',
+                sourceDialectSearchPlaceholder: 'Quellendialekt suchen...',
+                targetDialectSelectionLabel: 'Zieldialekt auswählen',
+                targetDialectSearchPlaceholder: 'Zieldialekt suchen...',
+                translatedOutputLabel: 'Übersetzter Text',
+                translatedOutputDefault: 'Die Übersetzung wird hier angezeigt...',
+                loadingTranslation: 'Wird übersetzt...',
+                howToUseTitle: 'Wie benutzt man den Übersetzer?',
+                howToUseStep1: 'Geben Sie den zu übersetzenden Text in das Feld "Text (Eingabe)" ein.',
+                howToUseStep2: 'Wählen Sie den "Quellendialekt", in dem der Originaltext verfasst wurde. Sie können den Dialekt im Suchfeld suchen.',
+                howToUseStep3: 'Wählen Sie den "Zieldialekt", in den Sie übersetzen möchten.',
+                howToUseStep4: 'Klicken Sie auf die Schaltfläche "Text übersetzen", um die Übersetzung zu erhalten.',
+                howToUseStep5: 'Wenn Sie die Übersetzungsrichtung tauschen möchten (z. B. von einem bestimmten Dialekt in einen anderen oder ins Hocharabisch), klicken Sie auf die Schaltfläche "Übersetzungsrichtung umkehren".',
+                howToUseStep6: 'Der Übersetzer unterstützt die Übersetzung zwischen allen verfügbaren Dialekten, einschließlich "Modernes Hocharabisch" als Quell- oder Zieloption.',
+                swapDirectionBtnText: 'Übersetzungsrichtung umkehren',
+                translateBtnText: 'Text übersetzen',
+                copyrightText: 'Alle Rechte vorbehalten Hassan Al-Ostoura 2025©',
+                errorMessageNoText: 'Bitte geben Sie Text zum Übersetzen ein.',
+                errorMessageNoDialect: 'Bitte wählen Sie sowohl den Quell- als auch den Zieldialekt aus.',
+                errorMessageSameDialect: 'Quell- und Zieldialekt müssen unterschiedlich sein.',
+                errorMessageDialectNotFound: 'Fehler: Quell- oder Zieldialekt nicht gefunden.',
+                errorMessageApiError: 'Serverantwortfehler: {status} - {message}',
+                errorMessageFetchError: 'Während der Übersetzung ist ein Fehler aufgetreten: {message}. Bitte versuchen Sie es erneut.',
+                noTranslationFound: 'Keine Übersetzung gefunden. Bitte versuchen Sie es erneut.',
+                reviewsTitle: 'Benutzerbewertungen',
+                addCommentTitle: 'Fügen Sie Ihren Kommentar hinzu',
+                commentNameLabel: 'Ihr Name (optional)',
+                commentNamePlaceholder: 'Geben Sie hier Ihren Namen ein...',
+                commentTextLabel: 'Ihr Kommentar',
+                commentTextPlaceholder: 'Schreiben Sie hier Ihren Kommentar...',
+                submitCommentBtnText: 'Kommentar senden',
+                anonymousUser: 'Anonym',
+                translationError: 'Ein Fehler ist aufgetreten.',
+                homeWelcome: 'Willkommen auf der Startseite!',
+            },
+            'pt': {
+                appTitle: 'Tradutor de Dialetos Árabes',
+                menuHome: 'Página inicial',
+                menuHelp: 'Ajuda',
+                menuLanguage: 'Idioma do site',
+                menuReviews: 'Avaliações de usuários',
+                sourceInputLabel: 'Texto (Entrada)',
+                sourceInputPlaceholder: 'Digite o texto aqui ({dialectName}) para traduzir...',
+                sourceDialectSelectionLabel: 'Selecionar Dialeto de Origem',
+                sourceDialectSearchPlaceholder: 'Pesquisar dialeto de origem...',
+                targetDialectSelectionLabel: 'Selecionar Dialeto de Destino',
+                targetDialectSearchPlaceholder: 'Pesquisar dialeto de destino...',
+                translatedOutputLabel: 'Texto Traduzido',
+                translatedOutputDefault: 'A tradução aparecerá aqui...',
+                loadingTranslation: 'Traduzindo...',
+                howToUseTitle: 'Como usar o Tradutor?',
+                howToUseStep1: 'Digite o texto que deseja traduzir no campo "Texto (Entrada)".',
+                howToUseStep2: 'Selecione o "Dialeto de Origem" no qual o texto original foi escrito. Você pode pesquisar o dialeto no campo de pesquisa.',
+                howToUseStep3: 'Selecione o "Dialeto de Destino" para o qual deseja traduzir.',
+                howToUseStep4: 'Clique no botão "Traduzir Texto" para obter a tradução.',
+                howToUseStep5: 'Se desejar inverter a direção da tradução (por exemplo, de um dialeto específico para outro ou para o árabe padrão moderno), clique no botão "Inverter direção de tradução".',
+                howToUseStep6: 'O tradutor suporta a tradução entre todos os dialetos disponíveis, incluindo "Árabe Padrão Moderno" como opção de origem ou destino.',
+                swapDirectionBtnText: 'Inverter direção de tradução',
+                translateBtnText: 'Traduzir Texto',
+                copyrightText: 'Todos os direitos reservados a Hassan Al-Ostoura 2025©',
+                errorMessageNoText: 'Por favor, insira o texto para traduzir.',
+                errorMessageNoDialect: 'Por favor, selecione os dialetos de origem e destino.',
+                errorMessageSameDialect: 'Os dialetos de origem e destino devem ser diferentes.',
+                errorMessageDialectNotFound: 'Erro: Dialeto de origem ou destino não encontrado.',
+                errorMessageApiError: 'Erro de resposta do servidor: {status} - {message}',
+                errorMessageFetchError: 'Ocorreu um erro durante a tradução: {message}. Por favor, tente novamente.',
+                noTranslationFound: 'Nenhuma tradução encontrada. Por favor, tente novamente.',
+                reviewsTitle: 'Avaliações de Usuários',
+                addCommentTitle: 'Adicione seu comentário',
+                commentNameLabel: 'Seu nome (opcional)',
+                commentNamePlaceholder: 'Digite seu nome aqui...',
+                commentTextLabel: 'Seu comentário',
+                commentTextPlaceholder: 'Escreva seu comentário aqui...',
+                submitCommentBtnText: 'Enviar comentário',
+                anonymousUser: 'Anônimo',
+                translationError: 'Ocorreu um erro.',
+                homeWelcome: 'Bem-vindo à página inicial!',
+            },
+        };
+
+        // Define the list of Arabic dialects, including Fusha
+        const dialects = [
+            { id: 'fusha', name: 'اللغة العربية الفصحى' },
+            { id: 'dz', name: 'اللهجة الجزائرية' },
+            { id: 'eg', name: 'اللهجة المصرية' },
+            { id: 'sy', name: 'اللهجة الشامية' },
+            { id: 'sa', name: 'اللهجة الخليجية' },
+            { id: 'iq', name: 'اللهجة العراقية' },
+            { id: 'ma', name: 'اللهجة المغربية' },
+            { id: 'tn', name: 'اللهجة التونسية' },
+            { id: 'lb', name: 'اللهجة اللبنانية' },
+            { id: 'jo', name: 'اللهجة الأردنية' },
+            { id: 'ps', name: 'اللهجة الفلسطينية' },
+            { id: 'kw', name: 'اللهجة الكويتية' },
+            { id: 'om', name: 'اللهجة العمانية' },
+            { id: 'qa', name: 'اللهجة القطرية' },
+            { id: 'bh', name: 'اللهجة البحرينية' },
+            { id: 'ye', name: 'اللهجة اليمنية' },
+            { id: 'sd', name: 'اللهجة السودانية' },
+            { id: 'ly', name: 'اللهجة الليبية' },
+            { id: 'mr', name: 'اللهجة الموريتانية' },
+            { id: 'dj', name: 'اللهجة الجيبوتية' },
+            { id: 'km', name: 'اللهجة القمرية' },
+            { id: 'so', name: 'اللهجة الصومالية' },
+        ];
+
+        // Define languages for site interface
+        const siteLanguages = [
+            { id: 'ar', name: 'العربية', flag: '🇸🇦' }, // Saudi Arabia flag for Arabic
+            { id: 'en', name: 'English', flag: '🇬🇧' }, // UK flag for English
+            { id: 'es', name: 'Español', flag: '🇪🇸' }, // Spain flag for Spanish
+            { id: 'it', name: 'Italiano', flag: '🇮🇹' }, // Italy flag for Italian
+            { id: 'ru', name: 'Русский', flag: '🇷🇺' }, // Russia flag for Russian
+            { id: 'fr', name: 'Français', flag: '🇫🇷' }, // France flag for French
+            { id: 'de', name: 'Deutsch', flag: '🇩🇪' }, // Germany flag for German
+            { id: 'pt', name: 'Português', flag: '🇵🇹' }, // Portugal flag for Portuguese
+        ];
+
+        // Default user comments (5 comments in different dialects)
+        let userComments = [
+            { author: 'أحمد', text: 'بصراحة، تطبيق هايل بزاف ويساعد بزاف في فهم اللهجات الأخرى.', dialect: 'اللهجة الجزائرية' },
+            { author: 'فاطمة', text: 'المترجم ده تحفة بجد! بيسهل عليا كتير أفهم أصحابي من البلاد التانية.', dialect: 'اللهجة المصرية' },
+            { author: 'علي', text: 'والله الشغل مرتب، كتير فادني بفهم بعض الكلمات الشامية اللي ما كنت أعرفها.', dialect: 'اللهجة الشامية' },
+            { author: 'سارة', text: 'تطبيق رائع، ساعدني كثير في التواصل وفهم أخواتنا في الخليج.', dialect: 'اللهجة العراقية' },
+            { author: 'خالد', text: 'برافو عليكم، فكرة ممتازة وتطبيق سهل الاستعمال. عجبني بزااف.', dialect: 'اللهجة المغربية' },
+        ];
+
+
+        // Function to update the error message display
+        const updateErrorDisplay = (message) => {
+            currentError = message;
+            if (message) {
+                errorMessageDiv.textContent = message;
+                errorMessageDiv.classList.remove('hidden');
+            } else {
+                errorMessageDiv.classList.add('hidden');
+                errorMessageDiv.textContent = '';
+            }
+        };
+
+        // Function to render dialect buttons based on current search term and target container
+        const renderDialectButtons = (containerElement, selectedId, updateIdCallback, currentSearchTerm) => {
+            const filteredDialects = dialects.filter(dialect =>
+                dialect.name.toLowerCase().includes(currentSearchTerm.toLowerCase())
+            );
+
+            containerElement.innerHTML = ''; // Clear previous buttons
+
+            filteredDialects.forEach(dialect => {
+                const button = document.createElement('button');
+                button.textContent = dialect.name;
+                button.setAttribute('data-id', dialect.id);
+                button.setAttribute('dir', 'rtl'); // Dialect names are always RTL
+                button.className = `py-2 px-4 rounded-full text-md font-medium transition-all duration-200
+                                    ${selectedId === dialect.id
+                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg scale-105'
+                                        : 'bg-gray-600 text-gray-200 hover:bg-gray-500 hover:text-white'
+                                    }`;
+                button.onclick = () => {
+                    updateIdCallback(dialect.id); // Call the specific update function for source/target
+                    // Re-render only the clicked button's container to update its active state
+                    renderDialectButtons(containerElement, selectedId, updateIdCallback, currentSearchTerm);
+                    updateTranslateButtonState(); // Update button state
+                };
+                containerElement.appendChild(button);
+            });
+        };
+
+        // Functions to update selected dialect IDs and re-render respective buttons
+        const selectSourceDialect = (id) => {
+            sourceDialectId = id;
+            updateUILayout();
+            renderDialectButtons(sourceDialectButtonsContainer, sourceDialectId, selectSourceDialect, sourceSearchTerm);
+        };
+
+        const selectTargetDialect = (id) => {
+            targetDialectId = id;
+            updateUILayout();
+            renderDialectButtons(targetDialectButtonsContainer, targetDialectId, selectTargetDialect, targetSearchTerm);
+        };
+
+        // Function to update the state of the translate button (disabled/enabled)
+        const updateTranslateButtonState = () => {
+            const isSourceInputEmpty = sourceInput.value.trim() === '';
+            translateButton.disabled = isLoading || isSourceInputEmpty || !sourceDialectId || !targetDialectId || (sourceDialectId === targetDialectId);
+
+            // Update button text and icon based on loading state
+            if (isLoading) {
+                translateButton.innerHTML = `
+                    <div class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                    <span>${translations[currentLanguage].loadingTranslation}</span>
+                `;
+            } else {
+                translateButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7.828a4 4 0 00-5.656 0L8 9.343l1.414 1.414L10.828 10.828a2 2 0 112.828 0l1.414 1.414L16 12.657l-1.414-1.414a4 4 0 000-5.656z" />
+                    </svg>
+                    <span>${translations[currentLanguage].translateBtnText}</span>
+                `;
+            }
+        };
+
+        // Function to update UI labels and placeholders based on selected dialects and current language
+        const updateUILayout = () => {
+            const currentSourceDialectName = dialects.find(d => d.id === sourceDialectId)?.name || translations[currentLanguage].sourceDialectSelectionLabel;
+            const currentTargetDialectName = dialects.find(d => d.id === targetDialectId)?.name || translations[currentLanguage].targetDialectSelectionLabel;
+
+            // Update static texts
+            appTitle.textContent = translations[currentLanguage].appTitle;
+            menuHome.textContent = translations[currentLanguage].menuHome;
+            menuHelp.textContent = translations[currentLanguage].menuHelp;
+            menuLanguage.textContent = translations[currentLanguage].menuLanguage;
+            menuReviews.textContent = translations[currentLanguage].menuReviews;
+            howToUseTitle.textContent = translations[currentLanguage].howToUseTitle;
+            howToUseStep1.textContent = translations[currentLanguage].howToUseStep1;
+            howToUseStep2.textContent = translations[currentLanguage].howToUseStep2;
+            howToUseStep3.textContent = translations[currentLanguage].howToUseStep3;
+            howToUseStep4.textContent = translations[currentLanguage].howToUseStep4;
+            howToUseStep5.textContent = translations[currentLanguage].howToUseStep5;
+            howToUseStep6.textContent = translations[currentLanguage].howToUseStep6;
+            swapDirectionBtnText.textContent = translations[currentLanguage].swapDirectionBtnText;
+            copyrightText.textContent = translations[currentLanguage].copyrightText;
+
+            // Update reviews section texts
+            reviewsTitle.textContent = translations[currentLanguage].reviewsTitle;
+            addCommentTitle.textContent = translations[currentLanguage].addCommentTitle;
+            commentNameLabel.textContent = translations[currentLanguage].commentNameLabel;
+            commentName.placeholder = translations[currentLanguage].commentNamePlaceholder;
+            commentTextLabel.textContent = translations[currentLanguage].commentTextLabel;
+            commentText.placeholder = translations[currentLanguage].commentTextPlaceholder;
+            submitCommentBtnText.textContent = translations[currentLanguage].submitCommentBtnText;
+
+            // Update dynamic texts
+            sourceInputLabel.textContent = `${translations[currentLanguage].sourceInputLabel} (${currentSourceDialectName})`;
+            sourceInput.placeholder = translations[currentLanguage].sourceInputPlaceholder.replace('{dialectName}', currentSourceDialectName);
+            translatedOutputLabel.textContent = `${translations[currentLanguage].translatedOutputLabel} (${currentTargetDialectName})`;
+            translatedOutput.textContent = translations[currentLanguage].translatedOutputDefault;
+
+            sourceDialectSelectionLabel.textContent = translations[currentLanguage].sourceDialectSelectionLabel;
+            sourceDialectSearch.placeholder = translations[currentLanguage].sourceDialectSearchPlaceholder;
+            targetDialectSelectionLabel.textContent = translations[currentLanguage].targetDialectSelectionLabel;
+            targetDialectSearch.placeholder = translations[currentLanguage].targetDialectSearchPlaceholder;
+
+
+            // Set document direction based on language
+            document.documentElement.dir = (currentLanguage === 'ar') ? 'rtl' : 'ltr';
+
+            // Clear output field and errors for clarity (keep input text)
+            updateErrorDisplay(null);
+            updateTranslateButtonState(); // Update button state
+        };
+
+        // Function to handle site language change
+        const setSiteLanguage = (langId) => {
+            currentLanguage = langId;
+            updateUILayout(); // Update all UI texts
+            menuDropdown.classList.add('hidden'); // Hide main menu
+            languageDropdown.classList.add('hidden'); // Hide language submenu
+        };
+
+        // Function to render language selection options
+        const renderLanguageOptions = () => {
+            languageDropdown.innerHTML = ''; // Clear previous options
+            siteLanguages.forEach(lang => {
+                const button = document.createElement('a');
+                button.href = "#";
+                button.className = `block px-4 py-3 text-lg text-gray-200 hover:bg-gray-700 transition-colors duration-200 ${lang.id === currentLanguage ? 'bg-gray-700' : ''}`;
+                button.innerHTML = `${lang.name} ${lang.flag}`;
+                button.onclick = (e) => {
+                    e.preventDefault();
+                    setSiteLanguage(lang.id);
+                };
+                languageDropdown.appendChild(button);
+            });
+        };
+
+        // Function to render user comments
+        const renderComments = () => {
+            commentsList.innerHTML = '';
+            userComments.forEach(comment => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment-container';
+                commentDiv.setAttribute('dir', 'rtl'); // Comments are in Arabic dialects
+                commentDiv.innerHTML = `
+                    <p class="comment-author">${comment.author || translations[currentLanguage].anonymousUser}</p>
+                    <p class="comment-text">${comment.text}</p>
+                `;
+                commentsList.appendChild(commentDiv);
+            });
+        };
+
+        // Function to handle adding a new comment
+        const addComment = () => {
+            const author = commentName.value.trim();
+            const text = commentText.value.trim();
+
+            if (text) {
+                userComments.push({
+                    author: author || translations[currentLanguage].anonymousUser,
+                    text: text,
+                    dialect: 'لهجة المستخدم' // This could be more dynamic if we track user's dialect
+                });
+                renderComments(); // Re-render the list
+                commentName.value = ''; // Clear input fields
+                commentText.value = '';
+            } else {
+                updateErrorDisplay(currentLanguage === 'ar' ? 'الرجاء كتابة تعليق.' : 'Please write a comment.');
+            }
+        };
+
+
+        // Function to handle the translation process
+        const handleTranslate = async () => {
+            updateErrorDisplay(null); // Clear any previous errors
+            sourceText = sourceInput.value.trim();
+
+            if (!sourceText) {
+                updateErrorDisplay(translations[currentLanguage].errorMessageNoText);
+                return;
+            }
+
+            if (!sourceDialectId || !targetDialectId) {
+                updateErrorDisplay(translations[currentLanguage].errorMessageNoDialect);
+                return;
+            }
+
+            if (sourceDialectId === targetDialectId) {
+                updateErrorDisplay(translations[currentLanguage].errorMessageSameDialect);
+                return;
+            }
+
+            // Set loading state to true
+            isLoading = true;
+            updateTranslateButtonState();
+            translatedOutput.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-emerald-400 border-t-transparent mb-3"></div>
+                    <span class="text-emerald-400">${translations[currentLanguage].loadingTranslation}</span>
+                </div>
+            `; // Show loading spinner
+
+            const sourceDialectName = dialects.find(d => d.id === sourceDialectId)?.name;
+            const targetDialectName = dialects.find(d => d.id === targetDialectId)?.name;
+
+            if (!sourceDialectName || !targetDialectName) {
+                updateErrorDisplay(translations[currentLanguage].errorMessageDialectNotFound);
+                isLoading = false;
+                updateTranslateButtonState();
+                return;
+            }
+
+            // Construct the prompt based on source and target dialects (always in Arabic for the model)
+            const prompt = `ترجم النص التالي من ${sourceDialectName} إلى ${targetDialectName} فقط، بدون أي مقدمات أو شرح إضافي. إذا كان النص بسيطاً جداً أو صعب الترجمة، حاول تقديم أفضل ترجمة ممكنة: "${sourceText}"`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+
+            // ====================================================================
+            // === IMPORTANT: Your API key goes here.                           ===
+            // ====================================================================
+            const apiKey = "AIzaSyBX0BlRN5CBG_go-KV9emD6HXqyPC0AXtI"; // <---- Replace with your API key
+
+            console.log("Starting API call...");
+            console.log("API URL:", `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`);
+            console.log("Payload:", payload);
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('API Error Response:', errorData);
+                    throw new Error(translations[currentLanguage].errorMessageApiError.replace('{status}', response.status).replace('{message}', errorData.error?.message || response.statusText));
+                }
+
+                const result = await response.json();
+                console.log('API Success Response:', result);
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    translatedOutput.textContent = text;
+                } else {
+                    translatedOutput.textContent = translations[currentLanguage].noTranslationFound;
+                    console.warn('Unexpected API response (no candidates or content):', result);
+                }
+            } catch (err) {
+                updateErrorDisplay(translations[currentLanguage].errorMessageFetchError.replace('{message}', err.message));
+                translatedOutput.textContent = translations[currentLanguage].translationError;
+                console.error('Fetch error caught:', err);
+            } finally {
+                isLoading = false;
+                updateTranslateButtonState();
+            }
+        };
+
+        // Event Listeners
+        sourceInput.addEventListener('input', updateTranslateButtonState);
+
+        sourceDialectSearch.addEventListener('input', (e) => {
+            sourceSearchTerm = e.target.value;
+            renderDialectButtons(sourceDialectButtonsContainer, sourceDialectId, selectSourceDialect, sourceSearchTerm);
+        });
+
+        targetDialectSearch.addEventListener('input', (e) => {
+            targetSearchTerm = e.target.value;
+            renderDialectButtons(targetDialectButtonsContainer, targetDialectId, selectTargetDialect, targetSearchTerm);
+        });
+
+        translateButton.addEventListener('click', handleTranslate);
+
+        swapDirectionButton.addEventListener('click', () => {
+            // Swap source and target dialects
+            const temp = sourceDialectId;
+            sourceDialectId = targetDialectId;
+            targetDialectId = temp;
+
+            // Re-render both dialect button containers and update layout
+            selectSourceDialect(sourceDialectId); // This call also updates UILayout and re-renders source buttons
+            selectTargetDialect(targetDialectId); // This call re-renders target buttons
+            // Clear inputs for clearer swap behavior
+            sourceInput.value = '';
+            translatedOutput.textContent = translations[currentLanguage].translatedOutputDefault;
+            updateErrorDisplay(null);
+        });
+
+        // Toggle dropdown menu visibility
+        menuButton.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent document click from closing it immediately
+            menuDropdown.classList.toggle('hidden');
+            languageDropdown.classList.add('hidden'); // Hide language dropdown if main menu is opened/closed
+            // Ensure reviews section is hidden when menu is toggled
+            reviewsSection.classList.add('hidden');
+            howToUseSection.classList.remove('hidden'); // Show how-to-use section by default
+        });
+
+        // Close dropdowns when clicking outside of them
+        document.addEventListener('click', (event) => {
+            if (!menuDropdown.contains(event.target) && !menuButton.contains(event.target) && !languageDropdown.contains(event.target) && !languageMenuItem.contains(event.target)) {
+                menuDropdown.classList.add('hidden');
+                languageDropdown.classList.add('hidden');
+            }
+        });
+
+        // Handle main menu item clicks
+        homeMenuItem.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default link behavior
+            translatedOutput.textContent = translations[currentLanguage].homeWelcome;
+            sourceInput.value = ''; // Clear source input
+            updateErrorDisplay(null); // Clear errors
+            menuDropdown.classList.add('hidden'); // Close the dropdown
+            updateUILayout(); // Reset UI layout
+            reviewsSection.classList.add('hidden'); // Hide reviews section
+            howToUseSection.classList.remove('hidden'); // Show how-to-use section
+        });
+
+        helpMenuItem.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default link behavior
+            howToUseSection.scrollIntoView({ behavior: 'smooth' });
+            menuDropdown.classList.add('hidden'); // Close the dropdown
+            reviewsSection.classList.add('hidden'); // Hide reviews section
+            howToUseSection.classList.remove('hidden'); // Show how-to-use section
+        });
+
+        languageMenuItem.addEventListener('click', (event) => {
+            event.preventDefault();
+            menuDropdown.classList.add('hidden'); // Hide main menu
+            languageDropdown.classList.toggle('hidden'); // Toggle language dropdown
+            renderLanguageOptions(); // Render language options when clicked
+        });
+
+        reviewsMenuItem.addEventListener('click', (event) => {
+            event.preventDefault();
+            menuDropdown.classList.add('hidden'); // Close the main dropdown
+            languageDropdown.classList.add('hidden'); // Ensure language dropdown is hidden
+            howToUseSection.classList.add('hidden'); // Hide how-to-use section
+            reviewsSection.classList.remove('hidden'); // Show reviews section
+            renderComments(); // Render current comments
+        });
+
+        submitCommentButton.addEventListener('click', addComment);
+
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            selectSourceDialect(sourceDialectId); // Initial render for source with default Fusha
+            selectTargetDialect(targetDialectId); // Initial render for target with default Algerian
+            setSiteLanguage('ar'); // Set initial language to Arabic and update UI
+            renderComments(); // Render initial comments
+        });
+    </script>
+</body>
+</html>
+
